@@ -1,0 +1,79 @@
+body {
+    font-family: sans-serif, Arial, Helvetica, sans-serif;
+}
+.formulario {
+    border: 5px solid #5c62de;
+    width: 600px;
+
+    margin: 0 auto;
+    padding: 30px;
+}
+.input{
+    width: 150px;
+    border: none;
+    border: 5px solid #c73434;
+    padding: 10px;
+    color: #c73434;
+    margin: 20px;
+}
+.input:hover{
+    border: none;
+    border: 5px solid #c73434;
+    color: #c73434;
+}
+.input:focus{
+    border: none;
+    border: 5px solid #c73434;
+    color: #c73434;
+}
+option{
+    border: none;
+    border: 5px solid #21a93e;
+}
+.parrafo {
+    font-size: 25px;
+}
+.boton{
+    display: flex;
+    gap: 150px;
+    justify-content: center;
+}
+.enviar{
+    width: 100px;
+    padding: 10px;
+    background-color: #edd135;
+    border-radius: 5px;
+}
+.limpiar{
+    width: 100px;
+    padding: 10px;
+    background:linear-gradient(to bottom right, #bee7aa, #60bd22);
+    border-radius: 5px;
+}
+.label{
+    position: relative;
+    display: block;
+    padding: 6px 10px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+.foto {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;          
+}
+
+.contenedor{
+    width: 70%;
+    border: 2px solid #000;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #5c62de;
+}

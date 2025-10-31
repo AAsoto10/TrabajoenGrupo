@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Citas - Sistema de Citas</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px}form{margin-top:12px}</style>
+</head>
+<body>
+  <h1>Citas</h1>
+  <a href="index.html">Volver</a>
+
+  <section>
+    <h2>Nueva cita</h2>
+    <form id="formCita">
+      <input type="hidden" name="id" />
+      <label>Médico: <select name="medico_id" required></select></label>
+      <label>Paciente: <select name="paciente_id" required></select></label>
+      <label>Fecha: <input name="fecha" type="date" required></label>
+      <label>Hora: <input name="hora" type="time" required></label>
+      <label>Motivo: <input name="motivo"></label>
+      <button>Guardar</button>
+      <button type="button" id="btnClear">Cancelar</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Lista de citas</h2>
+    <table id="tblCitas">
+      <thead><tr><th>ID</th><th>Médico</th><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Acciones</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const api = '../api/citas.php';
+    const apiMed = '../api/medicos.php?action=list';
+    const apiPac = '../api/pacientes.php?action=list';
+    const form = document.getElementById('formCita');
+    const tbody = document.querySelector('#tblCitas tbody');
+    const selMed = form.medico_id; const selPac = form.paciente_id;
+
+    async function loadSelects(){
+      const [medRes, pacRes] = await Promise.all([fetch(apiMed), fetch(apiPac)]);
+      const meds = await medRes.json(); const pacs = await pacRes.json();
+      selMed.innerHTML = meds.map(m=>`<option value="${m.id}">${m.nombre} (${m.especialidad})</option>`).join('');
+      selPac.innerHTML = pacs.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+    }
+
+    async function load(){
+      const res = await fetch(api+'?action=list');
+      const data = await res.json();
+      tbody.innerHTML = '';
+      data.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.id}</td><td>${c.medico_nombre}</td><td>${c.paciente_nombre}</td><td>${c.fecha}</td><td>${c.hora}</td><td>${c.motivo}</td><td><button data-id="${c.id}" class="del">Eliminar</button> <button data-id="${c.id}" class="edit">Editar</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(form);
+      const id = fd.get('id');
+      const action = id? 'update':'create';
+      const res = await fetch(api+'?action='+action, {method:'POST', body:fd});
+      const json = await res.json();
+      if (json.success) { form.reset(); await load(); }
+      else alert(json.error || 'Error');
+    });
+
+    document.getElementById('btnClear').addEventListener('click', ()=>form.reset());
+
+    tbody.addEventListener('click', async (e)=>{
+      if (e.target.classList.contains('del')){
+        if (!confirm('Eliminar cita?')) return;
+        const id = e.target.dataset.id;
+        const res = await fetch(api+'?action=delete', {method:'POST', body: new URLSearchParams({id})});
+        const j = await res.json(); if (j.success) load(); else alert(j.error);
+      }
+      if (e.target.classList.contains('edit')){
+        const id = e.target.dataset.id;
+        const res = await fetch(api+'?action=list');
+        const data = await res.json();
+        const c = data.find(x=>x.id==id);
+        if (c){ form.id.value = c.id; form.medico_id.value = c.medico_id; form.paciente_id.value = c.paciente_id; form.fecha.value = c.fecha; form.hora.value = c.hora; form.motivo.value = c.motivo; }
+      }
+    });
+
+    await loadSelects();
+    await load();
+  </script>
+</body>
+</html>

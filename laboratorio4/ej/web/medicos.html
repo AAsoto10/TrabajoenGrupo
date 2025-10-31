@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Medicos - Sistema de Citas</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px}form{margin-top:12px}</style>
+</head>
+<body>
+  <h1>Médicos</h1>
+  <a href="index.html">Volver</a>
+
+  <section>
+    <h2>Nuevo médico</h2>
+    <form id="formMedico">
+      <input type="hidden" name="id" />
+      <label>Nombre: <input name="nombre" required></label>
+      <label>Especialidad: <input name="especialidad"></label>
+      <label>Teléfono: <input name="telefono"></label>
+      <label>Correo: <input name="correo" type="email"></label>
+      <button>Guardar</button>
+      <button type="button" id="btnClear">Cancelar</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Lista de médicos</h2>
+    <table id="tblMedicos">
+      <thead><tr><th>ID</th><th>Nombre</th><th>Especialidad</th><th>Tel</th><th>Correo</th><th>Acciones</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const api = '../api/medicos.php';
+    const form = document.getElementById('formMedico');
+    const tbody = document.querySelector('#tblMedicos tbody');
+
+    async function load(){
+      const res = await fetch(api+'?action=list');
+      const data = await res.json();
+      tbody.innerHTML = '';
+      data.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${m.id}</td><td>${m.nombre}</td><td>${m.especialidad}</td><td>${m.telefono}</td><td>${m.correo}</td><td><button data-id="${m.id}" class="edit">Editar</button> <button data-id="${m.id}" class="del">Eliminar</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(form);
+      const id = fd.get('id');
+      const action = id? 'update':'create';
+      const res = await fetch(api+'?action='+action, {method:'POST', body:fd});
+      const json = await res.json();
+      if (json.success) { form.reset(); load(); }
+      else alert(json.error || 'Error');
+    });
+
+    document.getElementById('btnClear').addEventListener('click', ()=>form.reset());
+
+    tbody.addEventListener('click', async (e)=>{
+      if (e.target.classList.contains('del')){
+        if (!confirm('Eliminar médico?')) return;
+        const id = e.target.dataset.id;
+        const res = await fetch(api+'?action=delete', {method:'POST', body: new URLSearchParams({id})});
+        const j = await res.json(); if (j.success) load(); else alert(j.error);
+      }
+      if (e.target.classList.contains('edit')){
+        const id = e.target.dataset.id;
+        const res = await fetch(api+'?action=list');
+        const data = await res.json();
+        const m = data.find(x=>x.id==id);
+        if (m){ form.id.value = m.id; form.nombre.value = m.nombre; form.especialidad.value = m.especialidad; form.telefono.value = m.telefono; form.correo.value = m.correo; }
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>
