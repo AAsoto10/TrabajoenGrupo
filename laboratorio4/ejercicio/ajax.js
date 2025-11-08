@@ -12,7 +12,7 @@ function cargarContenido(abrir) {
     
 }
 
-function crearMedico()
+function crear()
 {
     var ajax = new XMLHttpRequest(); //crea el objeto ajax
     var datos=new FormData(document.querySelector('#form-insertar'));
@@ -20,15 +20,17 @@ function crearMedico()
     ajax.onreadystatechange = function () {
         if (ajax.readyState == 4 && ajax.status == 200) {
             document.querySelector('#contenido').innerHTML = ajax.responseText;
+            
             setTimeout(function(){
-                cargarContenido('read.php');
+                cargarContenido('read-paci.php');
             }, 5000);
+            
         }
     }
     ajax.send(datos);
 }
 
-function crearPaciente()
+function create()
 {
     var ajax = new XMLHttpRequest(); //crea el objeto ajax
     var datos=new FormData(document.querySelector('#insertar'));
@@ -45,6 +47,25 @@ function crearPaciente()
     }
     ajax.send(datos);
 }
+
+function crearCita(){
+    var ajax = new XMLHttpRequest(); //crea el objeto ajax
+    var datos=new FormData(document.querySelector('#form-cita'));
+    ajax.open("post", "create-cita.php", true);
+    ajax.onreadystatechange = function () {
+        if (ajax.readyState == 4 && ajax.status == 200) {
+            document.querySelector('#contenido').innerHTML = ajax.responseText;
+            
+            setTimeout(function(){
+                cargarContenido('read-citas.php');
+            }, 5000);
+            
+        }
+    }
+    ajax.send(datos);
+}
+
+
 
 function formEditar(id) {
     var ajax = new XMLHttpRequest(); //crea el objeto ajax
@@ -134,5 +155,33 @@ function eliminarPaciente(id) {
         }
         ajax.send();
     
+    }
+}
+
+function buscarCitas() {
+  const q = document.getElementById('buscar').value;
+  const url = 'read-citas.php?ajax=1&buscar=' + q;
+  const tabla = document.getElementById('tabla-citas');
+  fetch(url)
+    .then(res => res.text())
+    .then(html => tabla.innerHTML = html)
+    .catch(err => tabla.innerHTML = 'Error al buscar');
+}
+
+
+function cambiarEstado(id, estado) {
+    if (confirm("Estas seguro que quieres cambiar el estado a " + estado + "?")) {
+
+    var ajax = new XMLHttpRequest();
+    ajax.open("GET", `actualizarEstado.php?id=${id}&estado=${estado}`, true);
+    ajax.onreadystatechange = function () {
+        if (ajax.readyState == 4 && ajax.status == 200) {
+            document.querySelector('#contenido').innerHTML = ajax.responseText;
+        }
+        setTimeout(function(){
+            cargarContenido('read-citas.php');
+        }, 5000);
+    }
+    ajax.send();
     }
 }

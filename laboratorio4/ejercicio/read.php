@@ -62,7 +62,7 @@ $resultado=$con->query($sql);
     </tr>
     <?php } ?>
  </table>
- 
+
  
 </body>
 </html>
